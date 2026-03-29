@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>SPORTLINK - Fox Sports 501 Live</title>
+  
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    :root {
+      --bg-dark: #000000;
+      --bg-card: #0c0c0c;
+      --gold-main: #C0C0C0;
+      --text-white: #e0e0e0;
+      --border-color: rgba(192, 192, 192, 0.1);
+      --accent-red: #9370DB;
+      --gradient-bg-top: #0a0a0a;
+      --gradient-bg-bottom: #000000;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+      outline: none; 
+      user-select: none; 
+      -webkit-touch-callout: none;
+      -webkit-text-size-adjust: 100%;
+    }
+    
+    body {
+      margin: 0; padding: 0;
+      background-color: var(--bg-dark);
+      background-image: radial-gradient(circle at top center, var(--gradient-bg-top), var(--gradient-bg-bottom) 70%);
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-white);
+      padding-bottom: 80px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER */
+    header {
+      position: fixed; top: 0; width: 100%; height: 60px;
+      background: rgba(0, 0, 0, 0.98);
+      backdrop-filter: blur(25px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1000;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    }
+
+    .menu-icon { font-size: 26px; color: #fff; cursor: pointer; }
+    
+    .logo-container { 
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+    }
+    .logo-text { 
+      font-family: 'Rajdhani'; font-weight: 800; font-size: 20px;
+      color: #fff; letter-spacing: 1.5px;
+    }
+    .logo-text span { color: var(--gold-main); }
+
+    .header-live {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(255, 77, 77, 0.15);
+      border: 1px solid rgba(255, 77, 77, 0.3);
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .h-dot { 
+      width: 8px; height: 8px; background: var(--accent-red); border-radius: 50%; 
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .h-text { font-size: 11px; font-weight: 700; color: var(--accent-red); font-family: 'Rajdhani'; text-transform: uppercase; }
+
+    /* VIDEO */
+    .video-wrapper {
+      margin-top: 60px;
+      width: 100%; position: relative;
+      background: #000;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.9);
+      border-bottom-left-radius: 15px;
+      border-bottom-right-radius: 15px;
+      overflow: hidden;
+    }
+    .video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; }
+
+    #liveVideo { width: 100%; height: 100%; display: block; background: #000; }
+
+    .channel-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 8px; padding: 4px 10px;
+      font-family: 'Rajdhani'; font-weight: 700; font-size: 13px;
+      color: #FFD700; backdrop-filter: blur(8px); z-index: 10;
+    }
+
+    .loading-overlay {
+      position: absolute; inset: 0; background: #000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; z-index: 5;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid rgba(255,215,0,0.2);
+      border-top-color: #FFD700;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'Rajdhani'; font-size: 13px; color: #888; letter-spacing: 1px; }
+
+    .video-bar { height: 4px; background: linear-gradient(90deg, transparent 10%, #FFD700, #e6c200, transparent 90%); opacity: 0.7; }
+
+    /* TICKER */
+    .ticker-wrap {
+      background: var(--bg-card); height: 35px;
+      overflow: hidden; display: flex; align-items: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .ticker-text {
+      color: var(--gold-main); font-weight: 600; font-size: 13px;
+      white-space: nowrap; animation: scroll 22s linear infinite;
+      padding-left: 100%;
+    }
+    @keyframes scroll { 100% { transform: translateX(-100%); } }
+
+    /* ACTIONS */
+    .action-section { padding: 25px 16px; max-width: 600px; margin: 0 auto; }
+
+    .btn-main {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-radius: 14px; text-decoration: none;
+      background: linear-gradient(45deg, #FFD700, #ffc800);
+      box-shadow: 0 5px 20px rgba(255,215,0,0.4);
+    }
+    .btn-text h3 { margin: 0; color: #000; font-size: 15px; font-family: 'Rajdhani'; text-transform: uppercase; }
+    .btn-text p { margin: 0; color: #333; font-size: 10px; font-weight: 600; }
+
+    .btn-secondary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+    .btn-sec {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      padding: 12px; border-radius: 12px; text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.98);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: 0.4s; backdrop-filter: blur(20px);
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      width: 90%; max-width: 340px; background: #151515; border-radius: 25px;
+      padding: 30px 25px; text-align: center; border: 1px solid #333;
+    }
+    .pop-btn { display: block; width: 100%; padding: 14px; border-radius: 12px; text-decoration: none; margin-bottom: 10px; font-weight: 700; }
+    .pb-join { background: var(--gold-main); color: #000; }
+
+    /* SIDEBAR */
+    .sidebar {
+      position: fixed; left: -100%; top: 0; width: 280px; height: 100%;
+      background: #181818; z-index: 5000; transition: 0.3s;
+    }
+    .sidebar.open { left: 0; }
+    .sb-link { display: flex; align-items: center; gap: 16px; padding: 18px 25px; color: #b0b0b0; text-decoration: none; border-bottom: 1px solid #1f1f1f; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 4999; opacity: 0; pointer-events: none; transition: 0.3s; }
+    .overlay.active { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+<body>
+
+  <div class="modal-overlay" id="popup">
+    <div class="modal-box">
+      <div style="margin-bottom:15px;"><i class="material-icons" style="font-size:40px; color:#FFD700;">chat</i></div>
+      <div style="color:#fff; font-family:'Rajdhani'; font-size:20px; font-weight:800;">FOLLOW FOR LIVE UPDATES!</div>
+      <p style="color:#aaa; font-size:13px;">Don't miss a moment. Follow our WhatsApp channel for live links.</p>
+      <a href="https://whatsapp.com/channel/0029VbC2oQsC6ZvmwpR3v73v" class="pop-btn pb-join">Join WhatsApp Channel</a>
+      <button class="pop-btn" style="background:transparent; color:#777; border:1px solid #333;" onclick="closePopup()">Already Following</button>
+    </div>
+  </div>
+
+  <header>
+    <div class="menu-icon material-icons" onclick="toggleMenu()">notes</div>
+    <div class="logo-container">
+      <span class="logo-text">SPORT<span>LINK</span></span>
+    </div>
+    <div class="header-live">
+      <div class="h-dot"></div><span class="h-text">LIVE</span>
+    </div>
+  </header>
+
+  <div class="sidebar" id="sidebar">
+    <div style="padding:30px; font-family:'Rajdhani'; font-size:24px; font-weight:800; color:#fff; border-bottom:1px solid #333;">SPORT<span style="color:#C0C0C0;">LINK</span></div>
+    <a href="https://whatsapp.com/channel/0029VbC2oQsC6ZvmwpR3v73v" class="sb-link"><i class="material-icons">chat</i> Follow WhatsApp</a>
+    <a href="javascript:location.reload()" class="sb-link"><i class="material-icons">refresh</i> Refresh Page</a>
+    <a href="javascript:sharePage()" class="sb-link"><i class="material-icons">share</i> Share App</a>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+  <div class="video-wrapper">
+    <div class="video-container">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">LOADING STREAM...</div>
+      </div>
+      <div class="channel-badge">🦊 FOX SPORTS 501</div>
+      <video id="liveVideo" controls playsinline autoplay muted></video>
+    </div>
+    <div class="video-bar"></div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker-text">
+      WELCOME TO SPORTLINK 🏆 &nbsp;|&nbsp; NOW STREAMING: FOX SPORTS 501 🦊 &nbsp;|&nbsp; FOLLOW WHATSAPP FOR LIVE LINKS 📱 &nbsp;|&nbsp; NO BUFFERING HD STREAM
+    </div>
+  </div>
+
+  <div class="action-section">
+    <a href="https://whatsapp.com/channel/0029VbC2oQsC6ZvmwpR3v73v" class="btn-main">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <i class="material-icons" style="color:#000;">chat</i>
+        <div class="btn-text">
+          <h3>Follow WhatsApp</h3>
+          <p>For Link Updates & Live Sports</p>
+        </div>
+      </div>
+      <i class="material-icons" style="color:#000;">chevron_right</i>
+    </a>
+    <div class="btn-secondary-grid">
+      <a href="javascript:void(0)" onclick="sharePage()" class="btn-sec">
+        <i class="material-icons">share</i><span style="color:#ccc; font-size:12px;">Share</span>
+      </a>
+      <a href="javascript:location.reload()" class="btn-sec">
+        <i class="material-icons">refresh</i><span style="color:#ccc; font-size:12px;">Refresh</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const WEBSITE_ID = "sportlink_fox501_v2";
+    const M3U8_URL = "https://imgs-001.juno-api-noe.icu/secure/api/v1/fox-sports-501.m3u8?md5=2f8dbaa03e090562f1d3901ed2f3dd98&exp=1774790357";
+
+    const video = document.getElementById('liveVideo');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    function hideLoader() { loadingOverlay.style.display = 'none'; }
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({ enableWorker: true, lowLatencyMode: true });
+      hls.loadSource(M3U8_URL);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        hideLoader();
+        video.play().catch(() => {});
+      });
+      hls.on(Hls.Events.ERROR, (e, data) => {
+        if (data.fatal) setTimeout(() => { hls.loadSource(M3U8_URL); hls.startLoad(); }, 3000);
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Native HLS — Safari / iOS
+      video.src = M3U8_URL;
+      video.addEventListener('loadedmetadata', () => {
+        hideLoader();
+        video.play().catch(() => {});
+      });
+    }
+
+    function toggleMenu() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('active');
+    }
+
+    window.onload = () => {
+      setTimeout(() => {
+        if (!sessionStorage.getItem('pop_shown_' + WEBSITE_ID))
+          document.getElementById('popup').classList.add('active');
+      }, 2500);
+    };
+
+    function closePopup() {
+      document.getElementById('popup').classList.remove('active');
+      sessionStorage.setItem('pop_shown_' + WEBSITE_ID, 'true');
+    }
+
+    async function sharePage() {
+      if (navigator.share) await navigator.share({ title: 'SPORTLINK - Fox Sports 501', text: 'Watch Fox Sports 501 Live!', url: window.location.href });
+      else alert("Copy the link to share!");
+    }
+  </script>
+</body>
+</html>
